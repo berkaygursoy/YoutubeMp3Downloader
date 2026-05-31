@@ -20,6 +20,8 @@ export function mapYoutubeError(err: unknown): NextResponse {
   if (
     e?.statusCode === 410 ||
     e?.statusCode === 404 ||
+    msgLower.includes('410') ||
+    msgLower.includes('unavailable') ||
     msgLower.includes('not available') ||
     msgLower.includes('video unavailable') ||
     msgLower.includes('private video') ||

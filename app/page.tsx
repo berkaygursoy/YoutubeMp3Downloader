@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 type AppState =
   | { status: 'idle' }
@@ -15,14 +16,18 @@ type AppState =
   | { status: 'error'; message: string }
 
 function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60)
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
   const s = seconds % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
+  const mm = String(m).padStart(2, '0')
+  const ss = String(s).padStart(2, '0')
+  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`
 }
 
 export default function Home() {
   const [input, setInput] = useState('')
   const [state, setState] = useState<AppState>({ status: 'idle' })
+  const [downloading, setDownloading] = useState(false)
 
   async function handleFetch() {
     const trimmed = input.trim()
@@ -88,7 +93,7 @@ export default function Home() {
         </div>
 
         {state.status === 'loading' && (
-          <div className="flex items-center justify-center py-6">
+          <div role="status" aria-label="Loading" className="flex items-center justify-center py-6">
             <div className="w-5 h-5 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
           </div>
         )}
@@ -97,11 +102,15 @@ export default function Home() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-4">
             <div className="flex gap-3 items-start">
               {state.thumbnail && (
-                <img
-                  src={state.thumbnail}
-                  alt=""
-                  className="w-20 h-14 object-cover rounded-lg flex-shrink-0"
-                />
+                <div className="relative w-20 h-14 flex-shrink-0">
+                  <Image
+                    src={state.thumbnail}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    className="object-cover rounded-lg"
+                  />
+                </div>
               )}
               <div className="min-w-0">
                 <p className="text-white text-sm font-medium leading-snug line-clamp-2">
@@ -114,14 +123,19 @@ export default function Home() {
             </div>
             <div className="flex gap-2">
               <a
-                href={`/api/download?url=${encodeURIComponent(state.url)}`}
+                href={`/api/download?url=${encodeURIComponent(state.url)}&title=${encodeURIComponent(state.title)}`}
                 download
-                className="flex-1 block bg-zinc-100 text-zinc-900 font-medium text-sm text-center py-2.5 rounded-lg hover:bg-white transition-colors"
+                onClick={() => {
+                  setDownloading(true)
+                  setTimeout(() => setDownloading(false), 3000)
+                }}
+                className={`flex-1 block bg-zinc-100 text-zinc-900 font-medium text-sm text-center py-2.5 rounded-lg hover:bg-white transition-colors${downloading ? ' pointer-events-none opacity-50' : ''}`}
               >
                 Download MP3
               </a>
               <button
                 onClick={reset}
+                aria-label="Clear"
                 className="px-3 py-2.5 text-zinc-400 hover:text-zinc-200 text-sm rounded-lg border border-zinc-700 hover:border-zinc-500 transition-colors"
               >
                 ✕
@@ -132,7 +146,7 @@ export default function Home() {
 
         {state.status === 'error' && (
           <div className="bg-red-950/50 border border-red-900 rounded-lg px-4 py-3 flex items-start justify-between gap-3">
-            <p className="text-red-300 text-sm">{state.message}</p>
+            <p className="text-red-300 text-sm line-clamp-3">{state.message}</p>
             <button
               onClick={reset}
               className="text-red-400 hover:text-red-200 text-xs flex-shrink-0 transition-colors"

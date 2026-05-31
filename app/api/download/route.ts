@@ -9,7 +9,9 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url).searchParams.get('url')
+  const searchParams = new URL(request.url).searchParams
+  const url = searchParams.get('url')
+  const titleParam = searchParams.get('title')
 
   if (!url) {
     return NextResponse.json(
@@ -18,25 +20,36 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  let raw: Awaited<ReturnType<typeof getRawInfo>>
-  try {
-    raw = await getRawInfo(url.trim())
-  } catch (err) {
-    return mapYoutubeError(err)
+  let filename: string
+
+  if (titleParam && titleParam.trim()) {
+    // Title supplied by the client (already fetched via /api/info) — avoid a
+    // second full yt-dlp extraction just to learn the filename.
+    filename = `${sanitizeFilename(titleParam.trim())}.mp3`
+  } else {
+    // No title provided: fall back to extracting metadata server-side.
+    let raw: Awaited<ReturnType<typeof getRawInfo>>
+    try {
+      raw = await getRawInfo(url.trim(), request.signal)
+    } catch (err) {
+      return mapYoutubeError(err)
+    }
+    const { title } = parseVideoInfo(raw)
+    filename = `${sanitizeFilename(title)}.mp3`
   }
 
-  const { title } = parseVideoInfo(raw)
-  const filename = `${sanitizeFilename(title)}.mp3`
-
-  const audioStream = createAudioStream(url)
-  const mp3Stream = createMp3Stream(audioStream)
+  const audioStream = createAudioStream(url, request.signal)
+  const mp3Stream = createMp3Stream(audioStream, request.signal)
 
   const webStream = Readable.toWeb(mp3Stream) as ReadableStream
+
+  // RFC 5987 filename* for full Unicode title support.
+  const encodedName = encodeURIComponent(filename)
 
   return new NextResponse(webStream, {
     headers: {
       'Content-Type': 'audio/mpeg',
-      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Disposition': `attachment; filename="${filename}"; filename*=UTF-8''${encodedName}`,
       'X-Accel-Buffering': 'no',
       'Cache-Control': 'no-store',
     },

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const raw = await getRawInfo(url.trim())
+    const raw = await getRawInfo(url.trim(), request.signal)
     return NextResponse.json(parseVideoInfo(raw))
   } catch (err) {
     return mapYoutubeError(err)
