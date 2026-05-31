@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { Readable } from 'stream'
-import { getRawInfo, parseVideoInfo, createAudioStream } from '@/lib/youtube'
+import { getRawInfo, parseVideoInfo, createAudioStream, isValidYouTubeUrl } from '@/lib/youtube'
 import { createMp3Stream } from '@/lib/ffmpeg'
 import { sanitizeFilename } from '@/lib/sanitize'
 import { mapYoutubeError } from '@/lib/errors'
@@ -13,13 +13,14 @@ export async function GET(request: NextRequest) {
   const url = searchParams.get('url')
   const titleParam = searchParams.get('title')
 
-  if (!url) {
+  if (!url || !isValidYouTubeUrl(url.trim())) {
     return NextResponse.json(
       { error: 'Please enter a valid YouTube URL.' },
       { status: 400 }
     )
   }
 
+  const trimmedUrl = url.trim()
   let filename: string
 
   if (titleParam && titleParam.trim()) {
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
     // No title provided: fall back to extracting metadata server-side.
     let raw: Awaited<ReturnType<typeof getRawInfo>>
     try {
-      raw = await getRawInfo(url.trim(), request.signal)
+      raw = await getRawInfo(trimmedUrl, request.signal)
     } catch (err) {
       return mapYoutubeError(err)
     }
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     filename = `${sanitizeFilename(title)}.mp3`
   }
 
-  const audioStream = createAudioStream(url, request.signal)
+  const audioStream = createAudioStream(trimmedUrl, request.signal)
   const mp3Stream = createMp3Stream(audioStream, request.signal)
 
   const webStream = Readable.toWeb(mp3Stream) as ReadableStream

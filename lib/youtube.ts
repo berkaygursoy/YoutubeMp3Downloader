@@ -10,6 +10,10 @@ export interface VideoInfo {
 const YT_URL_RE =
   /^https?:\/\/(www\.)?(youtube\.com\/(watch\?|shorts\/|live\/)|youtu\.be\/)/
 
+export function isValidYouTubeUrl(url: string): boolean {
+  return YT_URL_RE.test(url)
+}
+
 function ytdlpBin(): string {
   return process.env.YTDLP_PATH ?? 'yt-dlp'
 }
@@ -87,6 +91,7 @@ export function createAudioStream(url: string, signal?: AbortSignal): Readable {
     '--no-playlist',
     '-f', 'bestaudio',
     '-o', '-',
+    '--',   // end-of-options: prevents a URL starting with '-' being parsed as a flag
     url,
   ])
 
