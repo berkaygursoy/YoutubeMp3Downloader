@@ -1,10 +1,10 @@
-# Aura Studio - High Fidelity Audio Extractor 🎵
+# Youtube Mp3 Converter - High Fidelity Audio Extractor 🎵
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 
-Aura Studio is a luxury-themed, highly optimized web application designed to extract high-fidelity MP3 audio from video URLs seamlessly. Built with a modern Next.js frontend and a lightning-fast Python FastAPI backend.
+Youtube Mp3 Converter is a luxury-themed, highly optimized web application designed to extract high-fidelity MP3 audio from video URLs seamlessly. Built with a modern Next.js frontend and a lightning-fast Python FastAPI backend.
 
 *(Türkçe açıklamalar aşağıdadır)*
 
@@ -28,8 +28,8 @@ Aura Studio is a luxury-themed, highly optimized web application designed to ext
 
 **1. Clone the repository:**
 ```bash
-git clone https://github.com/your-username/aura-studio.git
-cd aura-studio
+git clone https://github.com/your-username/YoutubeMp3Downloader.git
+cd YoutubeMp3Downloader
 ```
 
 **2. Setup Backend (Python):**
@@ -48,7 +48,7 @@ cd frontend
 npm install
 npm run dev
 ```
-Visit `http://localhost:3000` to start using Aura Studio.
+Visit `http://localhost:3000` to start using YoutubeMp3Downloader.
 
 ---
 
@@ -70,8 +70,8 @@ Visit `http://localhost:3000` to start using Aura Studio.
 
 **1. Projeyi bilgisayarınıza indirin:**
 ```bash
-git clone https://github.com/kullanici-adiniz/aura-studio.git
-cd aura-studio
+git clone https://github.com/kullanici-adiniz/YoutubeMp3Downloader.git
+cd YoutubeMp3Downloader
 ```
 
 **2. Arkayüz (Backend) Kurulumu:**
@@ -90,7 +90,7 @@ cd frontend
 npm install
 npm run dev
 ```
-Aura Studio'yu kullanmaya başlamak için tarayıcınızda `http://localhost:3000` adresine gidin.
+YoutubeMp3Downloader'yu kullanmaya başlamak için tarayıcınızda `http://localhost:3000` adresine gidin.
 
 ---
 *Built with precision and elegance.*
