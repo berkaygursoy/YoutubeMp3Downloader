@@ -180,6 +180,9 @@ When user's prompt is NOT in English:
 3. **Wait:** Do NOT invoke subagents or write code until the user clears the Gate.
 4. **Reference:** Full protocol in `@[skills/brainstorming]`.
 
+### 📚 Context7 Protocol
+**MANDATORY:** Always use `resolve-library-id` and `query-docs` before implementing modern framework patterns to ensure up-to-date best practices.
+
 ### 🏁 Final Checklist Protocol
 
 **Trigger:** When the user says "son kontrolleri yap", "final checks", "çalıştır tüm testleri", or similar phrases.
