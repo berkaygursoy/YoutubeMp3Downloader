@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Music, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-function cn(...inputs: ClassValue[]) {
+function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export default function Home() {
+export default function Home(): React.ReactElement {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<"idle" | "fetching_info" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -35,7 +35,7 @@ export default function Home() {
 
       if (!infoResponse.ok) {
         const errorData = await infoResponse.json().catch(() => ({}));
-        throw new Error(errorData.detail || "Failed to fetch video info");
+        throw new Error(errorData.detail || "Video bilgisi alınamadı");
       }
 
       const infoData = await infoResponse.json();
@@ -55,19 +55,18 @@ export default function Home() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || "Failed to convert video");
+        throw new Error(errorData.detail || "Video dönüştürülemedi");
       }
 
       // Handle file download
       const blob = await response.blob();
       
-      // Extract filename from header if possible, else fallback
       const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = `${infoData.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-'); // Fallback safe name
+      let filename = `${infoData.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-'); 
       if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-        if (filenameMatch && filenameMatch.length === 2) {
-          filename = decodeURIComponent(filenameMatch[1]);
+        const [, encodedName] = contentDisposition.match(/filename\*=UTF-8''(.+)/) || [];
+        if (encodedName) {
+          filename = decodeURIComponent(encodedName);
         }
       }
 
@@ -86,123 +85,156 @@ export default function Home() {
         setStatus("idle");
         setVideoTitle("");
         setThumbnail("");
-      }, 5000); // Reset after 5s
+      }, 5000); 
       setUrl("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setStatus("error");
-      setErrorMessage(err.message || "An unexpected error occurred");
+      if (err instanceof Error) {
+        setErrorMessage(err.message || "Beklenmeyen bir hata oluştu");
+      } else {
+        setErrorMessage("Beklenmeyen bir hata oluştu");
+      }
       setVideoTitle("");
       setThumbnail("");
     }
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center justify-center p-4 selection:bg-purple-500/30">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-neutral-950 -z-10" />
+    <main className="min-h-screen bg-background text-foreground flex flex-col selection:bg-gold selection:text-black">
+      {/* Elegant Header */}
+      <header className="w-full p-8 md:p-12 flex justify-between items-center z-10 reveal-fade">
+        <div className="font-sans text-xs tracking-[0.2em] uppercase text-white/50">
+          Arşiv
+        </div>
+        <div className="font-serif italic text-gold text-lg">
+          Aura
+        </div>
+        <div className="font-sans text-xs tracking-[0.2em] uppercase text-white/50">
+          Stüdyo
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8 w-full max-w-5xl mx-auto z-10">
       
-      <div className="w-full max-w-xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* GEO SEO Additions */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Aura Studio MP3 Converter",
+            "operatingSystem": "Web",
+            "applicationCategory": "MultimediaApplication"
+          })
+        }}
+      />
+      <h2 className="sr-only">Özellikler</h2>
+      <h2 className="sr-only">Kullanım</h2>
+
+      {/* Decorative Background Elements */}
         
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-neutral-900 rounded-2xl flex items-center justify-center border border-neutral-800 shadow-xl shadow-black/50">
-            <Music className="w-8 h-8 text-neutral-200" />
-          </div>
-          <h1 className="text-4xl font-semibold tracking-tight">
-            YouTube to <span className="text-neutral-400">MP3</span>
+        {/* Massive, Breathing Typography */}
+        <div className="text-center space-y-6 mb-24 reveal-up delay-200">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-[110px] tracking-tight leading-[0.9] text-white font-light">
+            Kusursuz <br />
+            <span className="text-gold italic pr-4">çıkarım.</span>
           </h1>
-          <p className="text-neutral-400 text-lg">
-            Convert any YouTube video to high-quality audio in seconds.
+          <p className="font-sans text-sm md:text-base tracking-widest uppercase text-white/40 max-w-xl mx-auto leading-relaxed pt-8">
+            Hareketli görüntü kaynaklarından ses elde etmek için premium bir araç. <br className="hidden md:block"/> Ödün vermek yok. Bozulma yok.
           </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-neutral-900/50 backdrop-blur-xl border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-          <form onSubmit={handleConvert} className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="url" className="text-sm font-medium text-neutral-300 ml-1">
-                YouTube URL
-              </label>
-              <div className="relative">
-                <input
-                  id="url"
-                  type="url"
-                  placeholder="https://youtube.com/watch?v=..."
-                  required
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  disabled={status === "loading"}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-4 py-4 text-neutral-100 placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all disabled:opacity-50"
-                />
-              </div>
+        {/* Minimalist Form */}
+        <div className="w-full max-w-2xl reveal-up delay-500">
+          <form onSubmit={handleConvert} className="w-full relative group">
+            <div className="relative flex items-end">
+              <label htmlFor="url" className="sr-only">Video Kaynak Bağlantısı</label>
+              <input
+                id="url"
+                type="url"
+                placeholder="Kaynak bağlantısını girin..."
+                required
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                disabled={status === "loading"}
+                className="w-full bg-transparent border-b border-white/20 text-white font-serif text-2xl md:text-4xl pl-0 pr-32 md:pr-48 py-6 focus:outline-none focus:border-gold transition-colors duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] placeholder:text-white/20 placeholder:italic disabled:opacity-50"
+              />
+              
+              <button
+                type="submit"
+                disabled={status === "loading" || status === "fetching_info" || !url}
+                className={cn(
+                  "absolute right-0 bottom-6 text-sm tracking-[0.2em] uppercase flex items-center gap-4 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  (!url || status === "loading" || status === "fetching_info") 
+                    ? "text-white/20 pointer-events-none" 
+                    : "text-gold hover:text-white"
+                )}
+              >
+                {(status === "loading" || status === "fetching_info") ? (
+                  <span className="flex items-center gap-3">
+                    <Loader2 className="w-4 h-4 animate-spin text-gold" />
+                    <span className="hidden sm:inline">İşleniyor</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-3 group-hover/btn:translate-x-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]">
+                    <span className="hidden sm:inline">Başlat</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </span>
+                )}
+              </button>
             </div>
+            
+            {/* The line that grows on hover */}
+            <div className="absolute bottom-0 left-0 w-0 h-[1px] bg-gold transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-full"></div>
+          </form>
 
-            {/* Thumbnail Preview */}
+          {/* Feedback & Result States */}
+          <div className="mt-16 relative min-h-[200px]">
+            {/* Thumbnail Preview with Sepia/Monochrome filter */}
             {thumbnail && (status === "loading" || status === "success") && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-neutral-800 shadow-xl animate-in fade-in zoom-in-95 duration-500">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={thumbnail} alt="Video Thumbnail" className="object-cover w-full h-full opacity-80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 text-sm font-medium text-neutral-200 line-clamp-2">
-                  {videoTitle}
+              <div className="absolute inset-0 reveal-fade">
+                <div className="relative w-full max-w-sm mx-auto aspect-video overflow-hidden rounded-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={thumbnail} 
+                    alt="Source" 
+                    className="object-cover w-full h-full scale-105 sepia-[.6] brightness-75 contrast-125 hover:scale-100 transition-transform duration-[2000ms] ease-[cubic-bezier(0.22,1,0.36,1)]" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+                  <div className="absolute bottom-4 left-0 w-full text-center px-4">
+                    <p className="font-serif italic text-gold text-lg truncate drop-shadow-md">{videoTitle}</p>
+                  </div>
                 </div>
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={status === "loading" || status === "fetching_info" || !url}
-              className={cn(
-                "w-full rounded-2xl py-4 font-medium flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.98]",
-                (status === "loading" || status === "fetching_info")
-                  ? "bg-neutral-800 text-neutral-400 cursor-not-allowed" 
-                  : "bg-neutral-100 text-neutral-950 hover:bg-white shadow-lg shadow-white/10"
-              )}
-            >
-              {status === "fetching_info" ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Fetching Video Info...
-                </>
-              ) : status === "loading" ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="truncate max-w-[200px] sm:max-w-[300px]">Converting: {videoTitle}</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-5 h-5" />
-                  Convert to MP3
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Status Messages */}
-          <div className="mt-6">
             {status === "error" && (
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 animate-in fade-in slide-in-from-top-2">
-                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                <p className="text-sm leading-relaxed">{errorMessage}</p>
+              <div className="absolute inset-0 text-center reveal-fade">
+                <p className="font-serif italic text-red-400/80 text-xl">{errorMessage}</p>
+                <p className="font-sans text-xs tracking-widest uppercase text-white/30 mt-4">İşlem başarısız</p>
               </div>
             )}
             
             {status === "success" && (
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 animate-in fade-in slide-in-from-top-2">
-                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
-                <p className="text-sm leading-relaxed">
-                  Success! Your download should begin immediately.
-                </p>
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 reveal-fade">
+                <p className="font-sans text-xs tracking-[0.2em] uppercase text-gold">Çıkarım Tamamlandı</p>
               </div>
             )}
           </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-neutral-500 font-medium tracking-wide uppercase">
-          Production Ready • High Quality Audio
-        </p>
-
+      </div>
+      
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Subtle glowing orb */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px]"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-white/5 blur-[120px]"></div>
+        
+        {/* Grain overlay */}
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")'}}></div>
       </div>
     </main>
   );

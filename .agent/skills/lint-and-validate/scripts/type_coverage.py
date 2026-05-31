@@ -22,7 +22,7 @@ def check_typescript_coverage(project_path: Path) -> dict:
     stats = {'any_count': 0, 'untyped_functions': 0, 'total_functions': 0}
     
     ts_files = list(project_path.rglob("*.ts")) + list(project_path.rglob("*.tsx"))
-    ts_files = [f for f in ts_files if 'node_modules' not in str(f) and '.d.ts' not in str(f)]
+    ts_files = [f for f in ts_files if 'node_modules' not in str(f) and '.d.ts' not in str(f) and '.next' not in str(f)]
     
     if not ts_files:
         return {'type': 'typescript', 'files': 0, 'passed': [], 'issues': ["[!] No TypeScript files found"], 'stats': stats}
