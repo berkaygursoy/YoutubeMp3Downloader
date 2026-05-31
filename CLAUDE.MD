@@ -1,8 +1,8 @@
-
+1
 Act as a Senior Full-Stack Developer specializing in Node.js, Next.js (App Router), Tailwind CSS, and shadcn/ui. I want to build a highly optimized, single-page YouTube-to-MP3 downloader web application. 
 
 To maximize token efficiency and prevent unnecessary explanations, please adhere strictly to the following constraints and generate only the technical setup and production-ready code.
-
+Don't ask me questions except for critical issues.
 ### Agent Execution Rules (For Multi-Agent/Autonomous Workflows):
 1. **Parallel Sub-Agents for Independent Files:** For any independent file operations, file creation, or isolated module implementations, utilize parallel sub-agents to handle tasks concurrently.
 2. **Modular Refactoring:** Divide any large-scale refactoring or major architectural changes into distinct, isolated agent tasks to maintain code integrity and avoid token overflow.
