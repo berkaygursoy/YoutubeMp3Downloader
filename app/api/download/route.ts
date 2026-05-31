@@ -28,11 +28,7 @@ export async function GET(request: NextRequest) {
   const { title } = parseVideoInfo(raw)
   const filename = `${sanitizeFilename(title)}.mp3`
 
-  const audioStream = createAudioStream(raw)
-  // Attach error handler BEFORE piping into ffmpeg so early/sync errors are caught
-  audioStream.on('error', (err) => {
-    console.error('[ytdl]', err.message)
-  })
+  const audioStream = createAudioStream(url)
   const mp3Stream = createMp3Stream(audioStream)
 
   const webStream = Readable.toWeb(mp3Stream) as ReadableStream
