@@ -50,3 +50,7 @@ Thumbs.db
 coverage/
 .pytest_cache/
 backend/.pytest_cache/
+
+# AG Kit
+.agent/
+.agent
