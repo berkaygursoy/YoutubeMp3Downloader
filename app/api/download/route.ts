@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   let raw: Awaited<ReturnType<typeof getRawInfo>>
   try {
-    raw = await getRawInfo(url)
+    raw = await getRawInfo(url.trim())
   } catch (err) {
     return mapYoutubeError(err)
   }
@@ -29,12 +29,11 @@ export async function GET(request: NextRequest) {
   const filename = `${sanitizeFilename(title)}.mp3`
 
   const audioStream = createAudioStream(raw)
-  const mp3Stream = createMp3Stream(audioStream)
-
+  // Attach error handler BEFORE piping into ffmpeg so early/sync errors are caught
   audioStream.on('error', (err) => {
     console.error('[ytdl]', err.message)
-    mp3Stream.destroy(err)
   })
+  const mp3Stream = createMp3Stream(audioStream)
 
   const webStream = Readable.toWeb(mp3Stream) as ReadableStream
 
@@ -43,6 +42,7 @@ export async function GET(request: NextRequest) {
       'Content-Type': 'audio/mpeg',
       'Content-Disposition': `attachment; filename="${filename}"`,
       'X-Accel-Buffering': 'no',
+      'Cache-Control': 'no-store',
     },
   })
 }
