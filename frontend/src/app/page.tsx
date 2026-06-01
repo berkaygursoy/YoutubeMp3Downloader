@@ -26,8 +26,10 @@ export default function Home(): React.ReactElement {
     setThumbnail("");
 
     try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      
       // 1. Fetch metadata first
-      const infoResponse = await fetch("http://localhost:8000/api/info", {
+      const infoResponse = await fetch(`${API_BASE_URL}/api/info`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
@@ -47,7 +49,7 @@ export default function Home(): React.ReactElement {
       // 2. Start conversion
       setStatus("loading");
       
-      const response = await fetch("http://localhost:8000/api/convert", {
+      const response = await fetch(`${API_BASE_URL}/api/convert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),

@@ -54,3 +54,6 @@ backend/.pytest_cache/
 # AG Kit
 .agent/
 .agent
+
+# Render
+render.yaml
