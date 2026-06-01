@@ -38,36 +38,32 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
         os.makedirs(output_dir)
 
     file_id = str(uuid.uuid4())
-    output_template = os.path.join(output_dir, f"{file_id}_%(title)s.%(ext)s")
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': output_template,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'noplaylist': True,
-        'quiet': True,
-        'no_warnings': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web'],
-                'player_skip': ['webpage', 'configs', 'js']
-            }
-        }
-    }
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-            title = info_dict.get('title', 'audio')
+        from pytubefix import YouTube
+        import subprocess
+        
+        # use_oauth=False disables manual login, it uses built-in JS PoW generator
+        yt = YouTube(url, use_oauth=False, allow_oauth_cache=True)
+        title = yt.title or 'audio'
+        
+        stream = yt.streams.get_audio_only()
+        if not stream:
+            return None, None, "No audio stream found"
             
-            for file in os.listdir(output_dir):
-                if file.startswith(file_id) and file.endswith('.mp3'):
-                    return os.path.join(output_dir, file), title, None
-                    
-            return None, None, "File was downloaded but MP3 conversion failed (ffmpeg might be missing)."
+        temp_filename = f"{file_id}_temp"
+        out_file = stream.download(output_path=output_dir, filename=temp_filename)
+        
+        final_path = os.path.join(output_dir, f"{file_id}.mp3")
+        
+        # Convert to proper mp3 using ffmpeg
+        subprocess.run(["ffmpeg", "-i", out_file, "-q:a", "0", "-map", "a", final_path, "-y"], 
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        
+        # Cleanup temp file
+        if os.path.exists(out_file):
+            os.remove(out_file)
+            
+        return final_path, title, None
     except Exception as e:
         return None, None, str(e)
