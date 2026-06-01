@@ -13,26 +13,21 @@ def is_valid_youtube_url(url: str) -> bool:
 
 def get_video_info(url: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    Fetches the video title and thumbnail without downloading.
+    Fetches the video title and thumbnail using YouTube's official oEmbed API.
     Returns (title, thumbnail_url, error_message).
     """
-    ydl_opts = {
-        'noplaylist': True,
-        'quiet': True,
-        'no_warnings': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web'],
-                'player_skip': ['webpage', 'configs', 'js']
-            }
-        }
-    }
+    import urllib.request
+    import urllib.parse
+    import json
+    
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)
-            return info_dict.get('title', 'Unknown Title'), info_dict.get('thumbnail'), None
+        oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json"
+        req = urllib.request.Request(oembed_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            return data.get('title', 'Unknown Title'), data.get('thumbnail_url'), None
     except Exception as e:
-        return None, None, str(e)
+        return None, None, f"Failed to fetch video info: {str(e)}"
 
 def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
