@@ -20,6 +20,12 @@ def get_video_info(url: str) -> Tuple[Optional[str], Optional[str], Optional[str
         'noplaylist': True,
         'quiet': True,
         'no_warnings': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android'],
+                'player_skip': ['webpage', 'configs', 'js']
+            }
+        }
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -42,7 +48,6 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': output_template,
-        'ffmpeg_location': r'C:\Users\Berkay\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -51,6 +56,12 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
         'noplaylist': True,
         'quiet': True,
         'no_warnings': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android'],
+                'player_skip': ['webpage', 'configs', 'js']
+            }
+        }
     }
 
     try:

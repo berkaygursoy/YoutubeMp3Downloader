@@ -57,3 +57,6 @@ backend/.pytest_cache/
 
 # Render
 render.yaml
+env.txt
+frontend/.env.production
+frontend/set_env.js
