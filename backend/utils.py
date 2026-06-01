@@ -1,7 +1,6 @@
 import os
 import re
 import uuid
-import yt_dlp
 from typing import Tuple, Optional
 
 YOUTUBE_REGEX = re.compile(
