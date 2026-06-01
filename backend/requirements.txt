@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-pytubefix
+https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
 python-multipart
 pydantic
 pytest
