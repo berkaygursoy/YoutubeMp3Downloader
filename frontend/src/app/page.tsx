@@ -26,7 +26,7 @@ export default function Home(): React.ReactElement {
     setThumbnail("");
 
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_BASE_URL = process.env.NODE_ENV === "production" ? "" : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
       
       // 1. Fetch metadata first
       const infoResponse = await fetch(`${API_BASE_URL}/api/info`, {
@@ -60,26 +60,18 @@ export default function Home(): React.ReactElement {
         throw new Error(errorData.detail || "Video dönüştürülemedi");
       }
 
-      // Handle file download
-      const blob = await response.blob();
-      
-      const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = `${infoData.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-'); 
-      if (contentDisposition) {
-        const [, encodedName] = contentDisposition.match(/filename\*=UTF-8''(.+)/) || [];
-        if (encodedName) {
-          filename = decodeURIComponent(encodedName);
-        }
+      // Handle direct download via Cobalt URL
+      const data = await response.json();
+      if (!data.download_url) {
+        throw new Error("İndirme bağlantısı alınamadı");
       }
 
-      const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.style.display = "none";
-      a.href = downloadUrl;
-      a.download = filename;
+      a.href = data.download_url;
+      a.download = `${infoData.title || "audio"}.mp3`.replace(/[/\\?%*:|"<>]/g, '-');
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
 
       setStatus("success");

@@ -37,14 +37,11 @@ def get_video_info(url: str) -> Tuple[Optional[str], Optional[str], Optional[str
     except Exception as e:
         return None, None, f"Failed to fetch video info: {str(e)}"
 
-def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+def get_cobalt_download_url(url: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     """
-    Downloads a YouTube video and converts it to MP3 using Cobalt API.
-    Returns (file_path, video_title, thumbnail_url, error_message).
+    Gets the direct MP3 download URL from Cobalt API.
+    Returns (download_url, video_title, thumbnail_url, error_message).
     """
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
     title, thumbnail_url, info_err = get_video_info(url)
     if not title:
         title = "audio"
@@ -74,18 +71,6 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
             err_text = data.get("text", "No download URL returned from Cobalt.")
             return None, None, None, f"Cobalt error: {err_text}"
 
-        file_id = str(uuid.uuid4())
-        mp3_path = os.path.join(output_dir, f"{file_id}.mp3")
-        
-        with requests.get(download_url, stream=True, timeout=60) as r:
-            r.raise_for_status()
-            with open(mp3_path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
-
-        if os.path.exists(mp3_path) and os.path.getsize(mp3_path) > 0:
-            return mp3_path, title, thumbnail_url, None
-
-        return None, None, None, "Failed to write MP3 file to disk or file is empty."
+        return download_url, title, thumbnail_url, None
     except Exception as e:
-        return None, None, None, f"Failed to download and convert: {str(e)}"
+        return None, None, None, f"Failed to get download URL: {str(e)}"
