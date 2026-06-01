@@ -22,7 +22,7 @@ def get_video_info(url: str) -> Tuple[Optional[str], Optional[str], Optional[str
         'no_warnings': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android'],
+                'player_client': ['android', 'web'],
                 'player_skip': ['webpage', 'configs', 'js']
             }
         }
@@ -58,7 +58,7 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
         'no_warnings': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android'],
+                'player_client': ['android', 'web'],
                 'player_skip': ['webpage', 'configs', 'js']
             }
         }

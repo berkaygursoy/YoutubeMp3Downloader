@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-yt-dlp
+git+https://github.com/yt-dlp/yt-dlp.git
 python-multipart
 pydantic
 pytest
