@@ -80,12 +80,22 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
     if cookies_file:
         ydl_opts["cookiefile"] = cookies_file
     else:
-        # Fallback: try multiple player clients without cookies
-        ydl_opts["extractor_args"] = {
-            "youtube": {
-                "player_client": ["tv_embedded", "android"],
-            }
-        }
+        # Check if built-in OAuth2 login is enabled (replaces obsolete oauth2 plugin)
+        if os.environ.get("YOUTUBE_OAUTH", "").strip().lower() == "true":
+            ydl_opts["username"] = "oauth2"
+            ydl_opts["password"] = ""
+        else:
+            # Allow specifying a local browser to extract cookies from (great for local development)
+            browser_env = os.environ.get("YOUTUBE_BROWSER", "").strip().lower()
+            if browser_env:
+                ydl_opts["cookiesfrombrowser"] = (browser_env,)
+            else:
+                # Fallback: try multiple working player clients for 2026 without cookies
+                ydl_opts["extractor_args"] = {
+                    "youtube": {
+                        "player_client": ["android_vr", "android", "web"],
+                    }
+                }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
