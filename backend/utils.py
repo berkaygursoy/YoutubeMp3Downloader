@@ -75,7 +75,10 @@ def download_and_convert_to_mp3(url: str, output_dir: str = "downloads") -> Tupl
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
-        "js_runtimes": ["deno", "node"],
+        "js_runtimes": {
+            "deno": {},
+            "node": {},
+        },
         "remote_components": ["ejs:github"],
     }
 
